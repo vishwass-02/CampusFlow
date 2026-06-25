@@ -6,24 +6,13 @@ import {
   Calculator, 
   Check, 
   AlertTriangle, 
-  Plus, 
-  Trash2, 
   ChevronLeft, 
   ChevronRight, 
   Settings, 
   Info, 
-  BookOpen, 
   Sparkles,
   RefreshCw
 } from 'lucide-react';
-
-interface Subject {
-  id: string;
-  name: string;
-  attended: number;
-  totalHeldSoFar: number;
-  plannedMisses: number;
-}
 
 interface CalcResult {
   remainingClasses: number;
@@ -42,15 +31,14 @@ interface CalendarDay {
 export default function AttendanceCalculatorPage() {
   const [semesterType, setSemesterType] = useState<'odd' | 'even' | ''>('odd');
   const [minRequiredPercent, setMinRequiredPercent] = useState<number>(75);
-  const [subjects, setSubjects] = useState<Subject[]>([
-    { id: '1', name: 'Database Management Systems', attended: 22, totalHeldSoFar: 28, plannedMisses: 2 },
-    { id: '2', name: 'Operating Systems', attended: 25, totalHeldSoFar: 30, plannedMisses: 3 },
-    { id: '3', name: 'Computer Networks', attended: 18, totalHeldSoFar: 26, plannedMisses: 4 }
-  ]);
-  const [newSubjectName, setNewSubjectName] = useState('');
-  const [calcResults, setCalcResults] = useState<Record<string, CalcResult>>({});
-  const [loading, setLoading] = useState<Record<string, boolean>>({});
-  const [errorMessage, setErrorMessage] = useState('');
+  
+  // Overall attendance states
+  const [attended, setAttended] = useState<number>(45);
+  const [totalHeldSoFar, setTotalHeldSoFar] = useState<number>(60);
+  const [plannedMisses, setPlannedMisses] = useState<number>(2);
+
+  const [calcResult, setCalcResult] = useState<CalcResult | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Calendar state
   const [currentYear, setCurrentYear] = useState(2026);
@@ -73,17 +61,17 @@ export default function AttendanceCalculatorPage() {
   useEffect(() => {
     if (!semesterType) return;
     
-    subjects.forEach(async (sub) => {
-      setLoading(prev => ({ ...prev, [sub.id]: true }));
+    const calculateOverallAttendance = async () => {
+      setLoading(true);
       try {
         const res = await fetch('http://localhost:4000/api/attendance/calculate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             semesterType,
-            attended: sub.attended,
-            totalHeldSoFar: sub.totalHeldSoFar,
-            plannedMisses: sub.plannedMisses,
+            attended,
+            totalHeldSoFar,
+            plannedMisses,
             minRequiredPercent
           })
         });
@@ -91,14 +79,16 @@ export default function AttendanceCalculatorPage() {
           throw new Error('Calculation error');
         }
         const data = await res.json();
-        setCalcResults(prev => ({ ...prev, [sub.id]: data }));
+        setCalcResult(data);
       } catch (err) {
         console.error('Failed to calculate attendance:', err);
       } finally {
-        setLoading(prev => ({ ...prev, [sub.id]: false }));
+        setLoading(false);
       }
-    });
-  }, [subjects, semesterType, minRequiredPercent]);
+    };
+
+    calculateOverallAttendance();
+  }, [semesterType, attended, totalHeldSoFar, plannedMisses, minRequiredPercent]);
 
   // Fetch calendar days when month/semester changes
   useEffect(() => {
@@ -130,53 +120,6 @@ export default function AttendanceCalculatorPage() {
 
     fetchCalendar();
   }, [currentYear, currentMonth, semesterType]);
-
-  const handleAddSubject = () => {
-    if (!newSubjectName.trim()) return;
-    const newSub: Subject = {
-      id: Date.now().toString(),
-      name: newSubjectName.trim(),
-      attended: 0,
-      totalHeldSoFar: 0,
-      plannedMisses: 0
-    };
-    setSubjects(prev => [...prev, newSub]);
-    setNewSubjectName('');
-  };
-
-  const handleRemoveSubject = (id: string) => {
-    setSubjects(prev => prev.filter(s => s.id !== id));
-    setCalcResults(prev => {
-      const copy = { ...prev };
-      delete copy[id];
-      return copy;
-    });
-  };
-
-  const handleUpdateSubject = (id: string, field: keyof Subject, val: any) => {
-    setSubjects(prev => prev.map(s => {
-      if (s.id !== id) return s;
-      
-      const updated = { ...s, [field]: val };
-      // Validations
-      if (field === 'attended') {
-        updated.attended = Math.max(0, parseInt(val) || 0);
-        if (updated.attended > updated.totalHeldSoFar) {
-          updated.totalHeldSoFar = updated.attended;
-        }
-      }
-      if (field === 'totalHeldSoFar') {
-        updated.totalHeldSoFar = Math.max(0, parseInt(val) || 0);
-        if (updated.attended > updated.totalHeldSoFar) {
-          updated.attended = updated.totalHeldSoFar;
-        }
-      }
-      if (field === 'plannedMisses') {
-        updated.plannedMisses = Math.max(0, parseInt(val) || 0);
-      }
-      return updated;
-    }));
-  };
 
   // Month navigation helpers
   const handlePrevMonth = () => {
@@ -278,7 +221,7 @@ export default function AttendanceCalculatorPage() {
               Attendance Calculator
             </h1>
             <p className="text-gray-400 text-sm mt-1">
-              Track classes, forecast future attendance, and visualize academic schedule patterns.
+              Track your classes, forecast attendance percentage, and visualize academic schedules.
             </p>
           </div>
 
@@ -329,191 +272,143 @@ export default function AttendanceCalculatorPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            {/* Left Col: Subject cards & Forms (2 cols on large screen) */}
+            {/* Left Col: Calculator Metric Overview & Setup Forms */}
             <div className="lg:col-span-2 space-y-6">
               
-              {/* Summary Stats Overview */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="bg-gray-900/40 backdrop-blur-md border border-gray-850 p-4 rounded-xl shadow-lg">
-                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Remaining Classes</p>
-                  <p className="text-2xl font-extrabold mt-1 text-white flex items-center gap-1.5">
-                    {Object.values(calcResults)[0]?.remainingClasses ?? '...'}
-                    <span className="text-xs font-medium text-gray-500">hours left</span>
-                  </p>
-                </div>
-                <div className="bg-gray-900/40 backdrop-blur-md border border-gray-850 p-4 rounded-xl shadow-lg">
-                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Risk Assessment</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    {Object.values(calcResults).some(r => r.riskLevel === 'danger') ? (
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/25 flex items-center gap-1">
-                        <AlertTriangle className="h-3 w-3 animate-pulse" /> Danger
-                      </span>
-                    ) : Object.values(calcResults).some(r => r.riskLevel === 'warning') ? (
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/25 flex items-center gap-1">
-                        <Info className="h-3 w-3" /> Warning
-                      </span>
-                    ) : (
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 flex items-center gap-1">
-                        <Check className="h-3 w-3" /> Safe
-                      </span>
+              {/* Dashboard Metrics Overview Panel */}
+              <div className="bg-gray-900/40 border border-gray-850 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-[150px] h-[150px] rounded-full bg-indigo-500/10 blur-[60px] pointer-events-none" />
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-center">
+                  
+                  {/* Gauge 1: Attendance Percentage */}
+                  <div className="flex flex-col items-center justify-center p-4 bg-gray-950/60 border border-gray-850 rounded-xl text-center relative min-h-[160px]">
+                    {loading && (
+                      <div className="absolute inset-0 bg-gray-950/40 rounded-xl flex items-center justify-center">
+                        <RefreshCw className="h-5 w-5 text-indigo-400 animate-spin" />
+                      </div>
                     )}
+                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2">Projected Attendance</span>
+                    <span className={`text-4xl font-black tracking-tight ${
+                      !calcResult ? 'text-gray-400'
+                      : calcResult.projectedAttendance >= 75 ? 'text-emerald-400'
+                      : calcResult.projectedAttendance >= 65 ? 'text-yellow-400'
+                      : 'text-red-400'
+                    }`}>
+                      {calcResult ? `${calcResult.projectedAttendance}%` : '...'}
+                    </span>
+                    <span className="text-[10px] text-gray-400 mt-3 font-semibold flex items-center gap-1">
+                      {calcResult ? (
+                        calcResult.projectedAttendance >= minRequiredPercent ? (
+                          <span className="text-emerald-400">✅ Target Met</span>
+                        ) : (
+                          <span className="text-red-400 flex items-center gap-0.5"><AlertTriangle className="h-3 w-3 inline" /> Below Target</span>
+                        )
+                      ) : ''}
+                    </span>
                   </div>
-                </div>
-                <div className="bg-gray-900/40 backdrop-blur-md border border-gray-850 p-4 rounded-xl shadow-lg col-span-1 sm:col-span-2 md:col-span-1">
-                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Semester Type</p>
-                  <p className="text-xl font-extrabold mt-1 text-indigo-400 uppercase tracking-wide">
-                    {semesterType} Semester
-                  </p>
+
+                  {/* Gauge 2: Remaining semester hours */}
+                  <div className="flex flex-col items-center justify-center p-4 bg-gray-950/60 border border-gray-850 rounded-xl text-center min-h-[160px]">
+                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2">Remaining Classes</span>
+                    <span className="text-4xl font-black text-white tracking-tight">
+                      {calcResult ? `${calcResult.remainingClasses}` : '...'}
+                    </span>
+                    <span className="text-[10px] text-gray-500 mt-3 font-semibold">semester hours left</span>
+                  </div>
+
+                  {/* Gauge 3: Safe absences count */}
+                  <div className="flex flex-col items-center justify-center p-4 bg-gray-950/60 border border-gray-850 rounded-xl text-center min-h-[160px]">
+                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2">Safe Absences Limit</span>
+                    <span className={`text-4xl font-black tracking-tight ${
+                      calcResult && calcResult.maxCanMiss > 0 ? 'text-indigo-400' : 'text-gray-400'
+                    }`}>
+                      {calcResult ? `${calcResult.maxCanMiss}` : '...'}
+                    </span>
+                    <span className="text-[10px] text-indigo-400/70 mt-3 font-semibold">hours you can miss</span>
+                  </div>
+
                 </div>
               </div>
 
-              {/* Subjects Form & Cards */}
+              {/* Calculator Form Setup */}
               <div className="bg-gray-900/40 border border-gray-850 rounded-2xl p-6 shadow-xl">
-                <div className="flex items-center justify-between mb-5 border-b border-gray-800 pb-3">
-                  <h2 className="text-lg font-bold flex items-center gap-2 text-white">
-                    <BookOpen className="h-4.5 w-4.5 text-indigo-400" />
-                    Course Attendance Log
-                  </h2>
+                <h2 className="text-lg font-bold flex items-center gap-2 text-white border-b border-gray-800 pb-3 mb-6">
+                  <Settings className="h-4.5 w-4.5 text-indigo-400" />
+                  Attendance Configurations
+                </h2>
 
-                  {/* Quick Add Subject */}
-                  <div className="flex gap-2">
+                <div className="space-y-6">
+                  {/* Hours inputs */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-[11px] text-gray-400 font-bold uppercase tracking-wider block mb-2">
+                        Total Hours Attended
+                      </label>
+                      <input 
+                        type="number"
+                        min="0"
+                        value={attended}
+                        onChange={(e) => {
+                          const val = Math.max(0, parseInt(e.target.value) || 0);
+                          setAttended(val);
+                          if (val > totalHeldSoFar) {
+                            setTotalHeldSoFar(val);
+                          }
+                        }}
+                        className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 font-semibold"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] text-gray-400 font-bold uppercase tracking-wider block mb-2">
+                        Total Hours Held So Far
+                      </label>
+                      <input 
+                        type="number"
+                        min="0"
+                        value={totalHeldSoFar}
+                        onChange={(e) => {
+                          const val = Math.max(0, parseInt(e.target.value) || 0);
+                          setTotalHeldSoFar(val);
+                          if (val < attended) {
+                            setAttended(val);
+                          }
+                        }}
+                        className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 font-semibold"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Planned Misses with Interactive Slider */}
+                  <div className="bg-gray-950/60 p-5 rounded-xl border border-gray-850 space-y-4">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] text-indigo-400 font-bold uppercase tracking-wider block">
+                        Planned Absences (Future Missed Hours)
+                      </label>
+                      <span className="text-sm font-extrabold text-white">
+                        {plannedMisses} / {calcResult?.remainingClasses || 0} hrs
+                      </span>
+                    </div>
+
                     <input 
-                      type="text"
-                      placeholder="Add Subject..."
-                      value={newSubjectName}
-                      onChange={(e) => setNewSubjectName(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleAddSubject()}
-                      className="bg-gray-950 border border-gray-800 rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-indigo-500 placeholder-gray-600 text-white w-40 md:w-48"
+                      type="range"
+                      min="0"
+                      max={calcResult?.remainingClasses || 10}
+                      value={plannedMisses}
+                      onChange={(e) => setPlannedMisses(parseInt(e.target.value) || 0)}
+                      className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none"
                     />
-                    <button 
-                      onClick={handleAddSubject}
-                      className="bg-indigo-600 hover:bg-indigo-500 p-1.5 rounded-lg text-white transition-all shadow-[0_2px_8px_rgba(99,102,241,0.2)]"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                    </button>
+
+                    <div className="flex justify-between text-[10px] text-gray-500 font-medium">
+                      <span>0 hrs (Perfect attendance hereafter)</span>
+                      <span>{calcResult?.remainingClasses || 0} hrs (All remaining missed)</span>
+                    </div>
                   </div>
+
                 </div>
-
-                {subjects.length === 0 ? (
-                  <div className="text-center py-10">
-                    <p className="text-gray-500 text-sm">No subjects added. Add your courses above.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {subjects.map((sub) => {
-                      const res = calcResults[sub.id];
-                      const isSubLoading = loading[sub.id];
-
-                      // Color coding for percentages
-                      const percentColor = !res ? 'text-gray-400' 
-                        : res.projectedAttendance >= 75 ? 'text-emerald-400' 
-                        : res.projectedAttendance >= 65 ? 'text-yellow-400' 
-                        : 'text-red-400';
-
-                      const borderHighlight = !res ? 'border-gray-800'
-                        : res.riskLevel === 'danger' ? 'border-red-500/25 bg-red-950/5'
-                        : res.riskLevel === 'warning' ? 'border-yellow-500/25 bg-yellow-950/5'
-                        : 'border-emerald-500/20 bg-emerald-950/5';
-
-                      return (
-                        <div 
-                          key={sub.id}
-                          className={`border rounded-xl p-5 transition-all duration-300 ${borderHighlight}`}
-                        >
-                          <div className="flex items-center justify-between gap-4 mb-4">
-                            <span className="font-bold text-white text-sm md:text-base leading-tight truncate">
-                              {sub.name}
-                            </span>
-                            <button 
-                              onClick={() => handleRemoveSubject(sub.id)}
-                              className="p-1 rounded-lg hover:bg-gray-800 text-gray-500 hover:text-red-400 transition-colors"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-                            
-                            {/* Inputs Column */}
-                            <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
-                              {/* Attended so far */}
-                              <div>
-                                <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">
-                                  Attended hours
-                                </label>
-                                <input 
-                                  type="number"
-                                  min="0"
-                                  value={sub.attended}
-                                  onChange={(e) => handleUpdateSubject(sub.id, 'attended', e.target.value)}
-                                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:border-indigo-500 font-semibold"
-                                />
-                              </div>
-
-                              {/* Total held so far */}
-                              <div>
-                                <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">
-                                  Total hours held
-                                </label>
-                                <input 
-                                  type="number"
-                                  min="0"
-                                  value={sub.totalHeldSoFar}
-                                  onChange={(e) => handleUpdateSubject(sub.id, 'totalHeldSoFar', e.target.value)}
-                                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:border-indigo-500 font-semibold"
-                                />
-                              </div>
-
-                              {/* Planned misses */}
-                              <div className="col-span-2 sm:col-span-1">
-                                <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">
-                                  Planned misses (hours)
-                                </label>
-                                <input 
-                                  type="number"
-                                  min="0"
-                                  max={res?.remainingClasses || 0}
-                                  value={sub.plannedMisses}
-                                  onChange={(e) => handleUpdateSubject(sub.id, 'plannedMisses', e.target.value)}
-                                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:border-indigo-500 font-semibold text-indigo-400"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Result Block */}
-                            <div className="bg-gray-950/70 border border-gray-850 p-4 rounded-xl flex flex-col justify-center h-full relative">
-                              {isSubLoading ? (
-                                <div className="absolute inset-0 bg-gray-950/40 rounded-xl flex items-center justify-center">
-                                  <RefreshCw className="h-4 w-4 text-indigo-400 animate-spin" />
-                                </div>
-                              ) : null}
-
-                              <div className="flex items-baseline justify-between">
-                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Projected</span>
-                                <span className={`text-xl font-black ${percentColor}`}>
-                                  {res ? `${res.projectedAttendance}%` : '...'}
-                                </span>
-                              </div>
-
-                              <div className="h-px bg-gray-850 my-2.5" />
-
-                              <div className="flex items-center justify-between text-[11px] text-gray-400">
-                                <span className="flex items-center gap-1">
-                                  <Info className="h-3 w-3 text-gray-500" />
-                                  Can miss up to:
-                                </span>
-                                <span className={`font-bold ${res?.maxCanMiss && res.maxCanMiss > 0 ? 'text-indigo-400' : 'text-gray-400'}`}>
-                                  {res ? `${res.maxCanMiss} hours` : '...'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
               </div>
+
             </div>
 
             {/* Right Col: Interactive Calendar view */}

@@ -1,6 +1,6 @@
 'use client';
 import { useRouter, usePathname } from 'next/navigation';
-import { Brain, Calendar, Activity, GraduationCap, LogOut, Calculator } from 'lucide-react';
+import { Brain, Calendar, GraduationCap, LogOut, Calculator } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function Navbar() {
@@ -21,22 +21,20 @@ export default function Navbar() {
     { name: 'Dashboard', path: '/dashboard', icon: Calendar },
     { name: 'Study Buddy', path: '/study-buddy', icon: Brain },
     { name: 'Notices', path: '/notice-summarizer', icon: GraduationCap },
-    { name: 'Automations', path: '/automations', icon: Activity },
     { name: 'Attendance', path: '/attendance-calculator', icon: Calculator },
   ];
 
   return (
     <nav className="sticky top-0 z-50 backdrop-blur-md bg-gray-950/70 border-b border-gray-800/85 px-6 py-3 flex items-center justify-between">
       <div 
-        className="flex items-center gap-2 cursor-pointer group"
+        className="flex items-center cursor-pointer group"
         onClick={() => router.push('/dashboard')}
       >
-        <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 p-1.5 rounded-lg group-hover:shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-300">
-          <GraduationCap className="h-5 w-5 text-white" />
-        </div>
-        <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent font-extrabold text-xl tracking-tight">
-          CampusFlow
-        </span>
+        <img 
+          src="/logo.png" 
+          alt="CampusFlow Logo" 
+          className="h-8.5 w-auto object-contain bg-white rounded-lg px-2 py-0.5 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-all duration-300"
+        />
       </div>
 
       <div className="flex gap-1 md:gap-2">

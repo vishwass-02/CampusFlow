@@ -82,12 +82,13 @@ export default function Onboarding() {
 
       <div className="relative w-full max-w-lg bg-gray-900/40 backdrop-blur-xl border border-gray-800/80 rounded-2xl p-8 md:p-10 shadow-2xl">
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 p-3 rounded-2xl mb-4 shadow-[0_0_20px_rgba(99,102,241,0.3)]">
-            <GraduationCap className="h-8 w-8 text-white animate-pulse" />
+          <div className="bg-white px-5 py-2.5 rounded-2xl mb-6 shadow-[0_0_25px_rgba(255,255,255,0.15)] flex items-center justify-center">
+            <img 
+              src="/logo.png" 
+              alt="CampusFlow Logo" 
+              className="h-12 w-auto object-contain"
+            />
           </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 bg-clip-text text-transparent">
-            Welcome to CampusFlow
-          </h1>
           <p className="text-gray-400 text-sm mt-1 max-w-sm">
             Configure your B.Tech student profile to unlock automated WhatsApp reminders & AI study assistance.
           </p>

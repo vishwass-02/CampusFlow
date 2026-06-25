@@ -29,5 +29,17 @@
       "email": "gaganaditya.shloka@gmail.com",
       "created_at": "2026-06-25T06:36:28.891Z"
     }
-  ]
+  ],
+  "tasks": [],
+  "notices": [],
+  "automation_preferences": [
+    {
+      "studentId": "f1d46361-c199-4fac-a263-d88b9cf9119e",
+      "deadlineReminders": true,
+      "deadlineHours": 24,
+      "dailyDigest": true,
+      "overdueAlerts": true
+    }
+  ],
+  "automation_logs": []
 }

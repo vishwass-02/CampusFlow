@@ -6,7 +6,11 @@ const DB_FILE = path.join(__dirname, 'database.json');
 
 const defaultDb = {
   users: [],
-  students: []
+  students: [],
+  tasks: [],
+  notices: [],
+  automation_preferences: [],
+  automation_logs: []
 };
 
 // Initialize DB file if it doesn't exist

@@ -38,4 +38,21 @@ const sendVerificationEmail = async (toEmail, code) => {
   }
 };
 
-module.exports = { sendVerificationEmail };
+const sendEmail = async (toEmail, subject, html) => {
+  if (!process.env.SMTP_EMAIL || process.env.SMTP_EMAIL === 'your.email@gmail.com') {
+    console.warn(`[SIMULATED EMAIL TO ${toEmail}] ${subject}`);
+    return;
+  }
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: process.env.SMTP_EMAIL, pass: process.env.SMTP_PASSWORD }
+  });
+  await transporter.sendMail({
+    from: `"CampusFlow Automations" <${process.env.SMTP_EMAIL}>`,
+    to: toEmail,
+    subject,
+    html
+  });
+};
+
+module.exports = { sendVerificationEmail, sendEmail };

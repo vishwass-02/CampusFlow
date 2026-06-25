@@ -1,0 +1,33 @@
+{
+  "users": [
+    {
+      "id": "f1d46361-c199-4fac-a263-d88b9cf9119e",
+      "email": "gaganaditya.shloka@gmail.com",
+      "password": "bxbemkdwiluynvlo",
+      "verified": true,
+      "verificationCode": "861053"
+    },
+    {
+      "id": "f8356ff7-3899-4510-a1d3-0b585dd36f67",
+      "email": "ojasvishwas.s@gmail.com",
+      "password": "Vishwas@2006",
+      "verified": true,
+      "verificationCode": "799012"
+    }
+  ],
+  "students": [
+    {
+      "id": "f1d46361-c199-4fac-a263-d88b9cf9119e",
+      "name": "G.Gagan Aditya ",
+      "branch": "AI & ML ",
+      "year": 3,
+      "subjects": [
+        "DBMS",
+        "OS"
+      ],
+      "phone": "9019707458",
+      "email": "gaganaditya.shloka@gmail.com",
+      "created_at": "2026-06-25T06:36:28.891Z"
+    }
+  ]
+}

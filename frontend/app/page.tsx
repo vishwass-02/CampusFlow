@@ -7,6 +7,6 @@ export default function Home() {
   useEffect(() => {
     const id = localStorage.getItem('studentId');
     router.push(id ? '/dashboard' : '/onboarding');
-  }, []);
+  }, [router]);
   return null;
 }

@@ -138,7 +138,7 @@ router.post('/', async (req, res) => {
   const confirmMsg = `⏰ Hi ${student.name}! Your *${task.subject}* task '${task.title}' is due on ${new Date(task.deadline).toDateString()}. — CampusFlow 🎓`;
   const triggered = await sendWhatsApp(`whatsapp:${student.phone}`, confirmMsg);
 
-  // 4. Schedule reminder (30s in test_mode, 24h before deadline in prod)
+  // 4. Schedule 24h reminder (30s in test_mode, 24h before deadline in prod)
   const delay = test_mode
     ? 30 * 1000
     : new Date(task.reminder_time) - new Date();
@@ -148,6 +148,20 @@ router.post('/', async (req, res) => {
       const reminderMsg = `🔔 Reminder: *${task.subject}* — '${task.title}' is due tomorrow! Don't miss it. — CampusFlow`;
       await sendWhatsApp(`whatsapp:${student.phone}`, reminderMsg);
     }, delay);
+  }
+
+  // 4.5. Schedule 1h reminder (60s in test_mode, 1h before deadline in prod)
+  const reminder1hTime = new Date(task.deadline);
+  reminder1hTime.setHours(reminder1hTime.getHours() - 1);
+  const delay1h = test_mode
+    ? 60 * 1000
+    : reminder1hTime - new Date();
+
+  if (delay1h > 0) {
+    setTimeout(async () => {
+      const reminder1hMsg = `⏰ Urgent Reminder: *${task.subject}* — '${task.title}' is due in 1 hour! Submit it soon. — CampusFlow`;
+      await sendWhatsApp(`whatsapp:${student.phone}`, reminder1hMsg);
+    }, delay1h);
   }
 
   // 5. Mark task as n8n_triggered (meaning WhatsApp triggered) in DB

@@ -1,7 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Navbar from '@/components/Navbar';
-import { Sparkles, Brain, HelpCircle, Check, HelpCircle as HelpIcon, ChevronRight } from 'lucide-react';
+import { Sparkles, Brain, HelpCircle, Check, ChevronRight, Upload, FileText, X, Loader2 } from 'lucide-react';
 
 export default function StudyBuddyPage() {
   const [notes,   setNotes]   = useState('');
@@ -13,6 +13,97 @@ export default function StudyBuddyPage() {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error,   setError]   = useState('');
+
+  // File upload state
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [extracting, setExtracting] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFileUpload(file: File) {
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/msword',
+      'application/vnd.ms-powerpoint',
+    ];
+    const allowedExts = ['.pdf', '.docx', '.doc', '.pptx', '.ppt'];
+    const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+
+    if (!allowedTypes.includes(file.type) && !allowedExts.includes(ext)) {
+      setError('Only PDF, DOCX, and PPTX files are supported.');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError('File too large. Maximum size is 10MB.');
+      return;
+    }
+
+    setUploadedFile(file);
+    setExtracting(true);
+    setError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('http://localhost:4000/ai/extract-text', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || data.detail || 'Failed to extract text');
+      }
+
+      setNotes(data.text);
+    } catch (err: any) {
+      setError(err.message || 'Failed to extract text from file.');
+      setUploadedFile(null);
+    } finally {
+      setExtracting(false);
+    }
+  }
+
+  function handleDrag(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files?.[0]) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
+  }
+
+  function handleFileInput(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.files?.[0]) {
+      handleFileUpload(e.target.files[0]);
+    }
+  }
+
+  function clearFile() {
+    setUploadedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
+  function formatFileSize(bytes: number) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
 
   async function generate() {
     if (!notes.trim()) return;
@@ -99,7 +190,7 @@ export default function StudyBuddyPage() {
             AI Study Buddy
           </h1>
           <p className="text-gray-400 text-sm mt-1">
-            Convert your complex lecture notes into bite-sized flashcards or multiple-choice quizzes in seconds.
+            Upload your lecture notes (PDF, DOCX, PPTX) or paste text to generate flashcards and quizzes in seconds.
           </p>
         </div>
 
@@ -131,6 +222,91 @@ export default function StudyBuddyPage() {
             </button>
           </div>
 
+          {/* File Upload Zone */}
+          <div className="mb-4">
+            <label className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2 block flex items-center gap-1.5">
+              <Upload className="h-3.5 w-3.5" />
+              Upload Document
+              <span className="text-gray-600 font-normal lowercase">(PDF, DOCX, PPTX — max 10MB)</span>
+            </label>
+
+            {!uploadedFile ? (
+              <div
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`relative border-2 border-dashed rounded-xl px-6 py-8 text-center cursor-pointer transition-all duration-300 ${
+                  dragActive
+                    ? 'border-indigo-500 bg-indigo-500/10 shadow-[0_0_20px_rgba(99,102,241,0.15)]'
+                    : 'border-gray-800 bg-gray-950/40 hover:border-gray-700 hover:bg-gray-950/60'
+                }`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.docx,.doc,.pptx,.ppt"
+                  onChange={handleFileInput}
+                  className="hidden"
+                />
+                <div className="flex flex-col items-center gap-2">
+                  <div className={`p-3 rounded-xl transition-all duration-300 ${
+                    dragActive ? 'bg-indigo-500/20' : 'bg-gray-800/60'
+                  }`}>
+                    <Upload className={`h-6 w-6 transition-colors duration-300 ${
+                      dragActive ? 'text-indigo-400' : 'text-gray-500'
+                    }`} />
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    <span className="text-indigo-400 font-semibold">Click to browse</span> or drag & drop your file here
+                  </p>
+                  <p className="text-[11px] text-gray-600">
+                    Supports PDF, Word (.docx), and PowerPoint (.pptx)
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-950/60 border border-gray-800 rounded-xl px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {extracting ? (
+                    <div className="p-2 rounded-lg bg-indigo-500/20">
+                      <Loader2 className="h-5 w-5 text-indigo-400 animate-spin" />
+                    </div>
+                  ) : (
+                    <div className="p-2 rounded-lg bg-emerald-500/20">
+                      <FileText className="h-5 w-5 text-emerald-400" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm text-white font-semibold truncate max-w-[300px]">
+                      {uploadedFile.name}
+                    </p>
+                    <p className="text-[11px] text-gray-500">
+                      {formatFileSize(uploadedFile.size)}
+                      {extracting && <span className="text-indigo-400 ml-2">Extracting text...</span>}
+                      {!extracting && <span className="text-emerald-400 ml-2">✓ Text extracted</span>}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); clearFile(); }}
+                  className="p-1.5 rounded-lg hover:bg-gray-800 transition-colors"
+                  title="Remove file"
+                >
+                  <X className="h-4 w-4 text-gray-500 hover:text-red-400" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 h-px bg-gray-800" />
+            <span className="text-[11px] text-gray-600 font-semibold uppercase tracking-wider">or paste your notes</span>
+            <div className="flex-1 h-px bg-gray-800" />
+          </div>
+
           {/* Notes textarea */}
           <textarea
             value={notes}
@@ -144,7 +320,7 @@ export default function StudyBuddyPage() {
 
           <button
             onClick={generate}
-            disabled={loading || !notes.trim()}
+            disabled={loading || !notes.trim() || extracting}
             className="mt-4 w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-indigo-950 disabled:to-purple-950 disabled:cursor-not-allowed text-white text-sm font-bold py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_4px_15px_rgba(99,102,241,0.2)]"
           >
             {loading ? (

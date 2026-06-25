@@ -1,6 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+const { PDFParse, VerbosityLevel } = require('pdf-parse');
+const mammoth = require('mammoth');
+const { parseOffice } = require('officeparser');
+const { upload } = require('../middleware/fileUpload');
 
 // ─────────────────────────────────────────────
 // Shared Claude API caller
@@ -160,6 +166,66 @@ Return ONLY the tip text, nothing else.`;
     console.error('Tip error:', err.message);
     res.status(500).json({ error: 'Claude API failed', detail: err.message });
   }
+});
+
+// ─────────────────────────────────────────────
+// POST /ai/extract-text
+// Accepts a file upload (PDF, DOCX, PPTX)
+// Returns: { text: "extracted content..." }
+// ─────────────────────────────────────────────
+router.post('/extract-text', upload.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  const filePath = req.file.path;
+  const ext = path.extname(req.file.originalname).toLowerCase();
+
+  try {
+    let text = '';
+
+    if (ext === '.pdf') {
+      const dataBuffer = fs.readFileSync(filePath);
+      const parser = new PDFParse({ data: dataBuffer, verbosity: VerbosityLevel.ERRORS });
+      await parser.load();
+      const textResult = await parser.getText();
+      text = textResult.text;
+    } else if (ext === '.docx' || ext === '.doc') {
+      const result = await mammoth.extractRawText({ path: filePath });
+      text = result.value;
+    } else if (ext === '.pptx' || ext === '.ppt') {
+      text = await parseOffice(filePath);
+    } else {
+      return res.status(400).json({ error: `Unsupported file type: ${ext}` });
+    }
+
+    // Clean up extracted text: collapse excessive whitespace
+    text = text.replace(/\n{3,}/g, '\n\n').trim();
+
+    if (!text || text.length < 10) {
+      return res.status(422).json({ error: 'Could not extract meaningful text from the file. The file may be image-based or empty.' });
+    }
+
+    console.log(`[AI] Extracted ${text.length} chars from ${req.file.originalname}`);
+    res.json({ text, filename: req.file.originalname });
+  } catch (err) {
+    console.error('Text extraction error:', err.message);
+    res.status(500).json({ error: 'Failed to extract text from file', detail: err.message });
+  } finally {
+    // Clean up temp file
+    try { fs.unlinkSync(filePath); } catch {}
+  }
+});
+
+// Multer error handler
+router.use((err, req, res, next) => {
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({ error: 'File too large. Maximum size is 10MB.' });
+  }
+  if (err.message?.includes('Only PDF')) {
+    return res.status(400).json({ error: err.message });
+  }
+  next(err);
 });
 
 module.exports = router;

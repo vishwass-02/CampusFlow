@@ -3,7 +3,7 @@ const router = express.Router();
 const axios = require('axios');
 const { supabase } = require('../middleware/supabase');
 
-// Helper: compute reminder time (24h before deadline, or 30s from now for testing)
+// Helper: compute reminder time (2h before deadline, or 30s from now for testing)
 function computeReminderTime(deadlineISO, testMode = false) {
   if (testMode) {
     const t = new Date();
@@ -11,7 +11,7 @@ function computeReminderTime(deadlineISO, testMode = false) {
     return t.toISOString();
   }
   const d = new Date(deadlineISO);
-  d.setHours(d.getHours() - 24);
+  d.setHours(d.getHours() - 2);
   return d.toISOString();
 }
 
@@ -138,67 +138,17 @@ router.post('/', async (req, res) => {
   const confirmMsg = `⏰ Hi ${student.name}! Your *${task.subject}* task '${task.title}' is due on ${new Date(task.deadline).toDateString()}. — CampusFlow 🎓`;
   const triggered = await sendWhatsApp(`whatsapp:${student.phone}`, confirmMsg);
 
-  // 4. Schedule 24h reminder (30s in test_mode, 24h before deadline in prod)
+  // 4. Schedule follow-up reminder (30s in test_mode, 2h before deadline in prod)
   const delay = test_mode
     ? 30 * 1000
     : new Date(task.reminder_time) - new Date();
 
   if (delay > 0) {
     setTimeout(async () => {
-      const reminderMsg = `🔔 Reminder: *${task.subject}* — '${task.title}' is due tomorrow! Don't miss it. — CampusFlow`;
+      const reminderMsg = `🔔 Follow-up Reminder: *${task.subject}* — '${task.title}' is due in 2 hours! Make sure to submit. — CampusFlow`;
       await sendWhatsApp(`whatsapp:${student.phone}`, reminderMsg);
     }, delay);
   }
-
-  // 4.5. Schedule 1h reminder (60s in test_mode, 1h before deadline in prod)
-  const reminder1hTime = new Date(task.deadline);
-  reminder1hTime.setHours(reminder1hTime.getHours() - 1);
-  const delay1h = test_mode
-    ? 60 * 1000
-    : reminder1hTime - new Date();
-
-  if (delay1h > 0) {
-    setTimeout(async () => {
-      const reminder1hMsg = `⏰ Urgent Reminder: *${task.subject}* — '${task.title}' is due in 1 hour! Submit it soon. — CampusFlow`;
-      await sendWhatsApp(`whatsapp:${student.phone}`, reminder1hMsg);
-    }, delay1h);
-  }
-
-  // 4.6. Schedule recurring 3h progress updates (15s in test_mode, 3h in prod)
-  const intervalMs = test_mode ? 15 * 1000 : 3 * 3600 * 1000;
-  const intervalId = setInterval(async () => {
-    const { data: currentTask, error: fetchErr } = await supabase
-      .from('tasks')
-      .select('status, deadline, title, subject')
-      .eq('id', task.id)
-      .single();
-
-    if (fetchErr || !currentTask || currentTask.status !== 'pending') {
-      clearInterval(intervalId);
-      return;
-    }
-
-    const timeLeftMs = new Date(currentTask.deadline) - new Date();
-    if (timeLeftMs <= 0) {
-      clearInterval(intervalId);
-      return;
-    }
-
-    const hoursLeft = Math.floor(timeLeftMs / (3600 * 1000));
-    const minsLeft = Math.floor((timeLeftMs % (3600 * 1000)) / 60000);
-    let timeStr = "";
-    if (hoursLeft > 0) {
-      timeStr += `${hoursLeft} hour(s)`;
-      if (minsLeft > 0) {
-        timeStr += ` and ${minsLeft} minute(s)`;
-      }
-    } else {
-      timeStr += `${minsLeft} minute(s)`;
-    }
-
-    const progressMsg = `⏳ Progress Alert: *${currentTask.subject}* — '${currentTask.title}' has *${timeStr}* remaining until submission! — CampusFlow`;
-    await sendWhatsApp(`whatsapp:${student.phone}`, progressMsg);
-  }, intervalMs);
 
   // 5. Mark task as n8n_triggered (meaning WhatsApp triggered) in DB
   if (triggered) {

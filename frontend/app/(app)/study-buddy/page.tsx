@@ -1,7 +1,6 @@
 'use client';
 import { useState, useRef } from 'react';
-import Navbar from '@/components/Navbar';
-import { Sparkles, Brain, HelpCircle, Check, ChevronRight, Upload, FileText, X, Loader2 } from 'lucide-react';
+import { Sparkles, Brain, HelpCircle, Check, Upload, FileText, X, Loader2 } from 'lucide-react';
 
 export default function StudyBuddyPage() {
   const [notes,   setNotes]   = useState('');
@@ -61,8 +60,9 @@ export default function StudyBuddyPage() {
       }
 
       setNotes(data.text);
-    } catch (err: any) {
-      setError(err.message || 'Failed to extract text from file.');
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to extract text from file.';
+      setError(errorMsg);
       setUploadedFile(null);
     } finally {
       setExtracting(false);
@@ -130,6 +130,7 @@ export default function StudyBuddyPage() {
         }
         setMcqs(data.mcqs);
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || 'AI generation failed. Is your backend running on port 4000?');
     } finally {
@@ -169,6 +170,7 @@ export default function StudyBuddyPage() {
         }
         setMcqs(prev => [...prev, ...data.mcqs]);
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || 'AI generation failed.');
     } finally {
@@ -177,47 +179,45 @@ export default function StudyBuddyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white font-sans overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#050816] overflow-x-hidden pb-16">
       {/* Glow effects */}
-      <div className="absolute top-0 right-1/4 w-[350px] h-[350px] rounded-full bg-indigo-500/5 blur-[100px] pointer-events-none" />
+      <div className="spotlight-top" />
+      <div className="spotlight-bottom" />
 
-      {/* Shared Navbar */}
-      <Navbar />
-
-      <main className="max-w-4xl mx-auto px-6 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
+      <main className="max-w-4xl mx-auto px-6 py-12 relative z-10 space-y-12">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white flex items-center gap-2 font-brand-sans">
             AI Study Buddy
           </h1>
-          <p className="text-gray-400 text-sm mt-1">
+          <p className="text-slate-400 text-sm mt-1 font-medium">
             Upload your lecture notes (PDF, DOCX, PPTX) or paste text to generate flashcards and quizzes in seconds.
           </p>
         </div>
 
         {/* Form Container */}
-        <div className="bg-gray-900/40 backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-xl mb-8">
+        <div className="glass-card p-6 shadow-xl relative z-10 border border-white/8">
           {/* Tab switcher */}
-          <div className="flex gap-2.5 mb-5 border-b border-gray-800 pb-4">
+          <div className="flex gap-2.5 mb-5 border-b border-white/5 pb-4">
             <button 
               onClick={() => setTab('flashcards')} 
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer border ${
                 tab === 'flashcards' 
-                  ? 'bg-indigo-600 text-white shadow-[0_4px_12px_rgba(99,102,241,0.25)]' 
-                  : 'bg-gray-950 text-gray-400 hover:text-white border border-gray-800'
+                  ? 'bg-blue-500/10 text-blue-400 border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.3)]' 
+                  : 'bg-white/2 text-slate-400 hover:text-white border-transparent'
               }`}
             >
-              <Brain className="h-4 w-4" />
+              <Brain className="h-3.5 w-3.5" />
               🃏 Flashcards
             </button>
             <button 
               onClick={() => setTab('mcq')} 
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer border ${
                 tab === 'mcq' 
-                  ? 'bg-indigo-600 text-white shadow-[0_4px_12px_rgba(99,102,241,0.25)]' 
-                  : 'bg-gray-950 text-gray-400 hover:text-white border border-gray-800'
+                  ? 'bg-blue-500/10 text-blue-400 border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.3)]' 
+                  : 'bg-white/2 text-slate-400 hover:text-white border-transparent'
               }`}
             >
-              <HelpCircle className="h-4 w-4" />
+              <HelpCircle className="h-3.5 w-3.5" />
               ❓ MCQ Quiz
             </button>
           </div>
@@ -313,15 +313,15 @@ export default function StudyBuddyPage() {
             onChange={e => setNotes(e.target.value)}
             rows={6}
             placeholder="Paste your lecture notes here... e.g. Normalization in DBMS removes redundancy. 1NF removes duplicate columns. 2NF removes partial dependencies. 3NF removes transitive dependencies."
-            className="w-full bg-gray-950/60 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder-gray-600 resize-none font-medium leading-relaxed"
+            className="w-full bg-[#030712]/50 border border-white/6 rounded-xl px-4 py-3.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all placeholder-slate-550 resize-none font-medium leading-relaxed focus:bg-[#030712]/70"
           />
 
-          {error && <p className="text-red-400 text-xs mt-3 flex items-center gap-1">⚠️ {error}</p>}
+          {error && <p className="text-rose-400 text-xs mt-3 flex items-center gap-1">⚠️ {error}</p>}
 
           <button
             onClick={generate}
             disabled={loading || !notes.trim() || extracting}
-            className="mt-4 w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-indigo-950 disabled:to-purple-950 disabled:cursor-not-allowed text-white text-sm font-bold py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_4px_15px_rgba(99,102,241,0.2)]"
+            className="mt-4 w-full glass-btn-primary disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold py-3.5 rounded-xl cursor-pointer"
           >
             {loading ? (
               <>✨ Generating Study Material...</>
@@ -337,8 +337,8 @@ export default function StudyBuddyPage() {
         {/* Flashcards Results */}
         {cards.length > 0 && (
           <div className="space-y-4">
-            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
-              Generated Flashcards <span className="text-indigo-400/90">(Tap to flip)</span>
+            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2">
+              Generated Flashcards <span className="text-blue-450">(Tap to flip)</span>
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {cards.map((card, i) => (
@@ -358,21 +358,21 @@ export default function StudyBuddyPage() {
                   >
                     {/* Front */}
                     <div 
-                      className="absolute inset-0 bg-gray-900 border border-gray-800 hover:border-indigo-500/30 rounded-xl p-5 flex flex-col justify-between transition-colors duration-300"
+                      className="absolute inset-0 glass-panel border-white/8 hover:border-blue-500/30 rounded-xl p-5 flex flex-col justify-between transition-colors duration-300 glass-panel-hover"
                       style={{ backfaceVisibility: 'hidden' }}
                     >
-                      <span className="text-indigo-400 text-[10px] font-extrabold tracking-wider uppercase">Question</span>
+                      <span className="text-blue-400 text-[9px] font-bold tracking-wider uppercase">Question</span>
                       <p className="text-white font-bold text-sm leading-relaxed">{card.front}</p>
-                      <span className="text-gray-500 text-[10px] font-semibold text-right">tap to reveal →</span>
+                      <span className="text-slate-500 text-[10px] font-semibold text-right">tap to reveal →</span>
                     </div>
                     {/* Back */}
                     <div 
-                      className="absolute inset-0 bg-indigo-950/40 border border-indigo-500/35 rounded-xl p-5 flex flex-col justify-between"
+                      className="absolute inset-0 bg-blue-950/20 border border-blue-500/30 rounded-xl p-5 flex flex-col justify-between shadow-[0_4px_25px_rgba(59,130,246,0.05)]"
                       style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
                     >
-                      <span className="text-emerald-400 text-[10px] font-extrabold tracking-wider uppercase">Answer</span>
-                      <p className="text-gray-200 font-medium text-sm leading-relaxed">{card.back}</p>
-                      <span className="text-indigo-400/70 text-[10px] font-semibold text-right">tap to flip back</span>
+                      <span className="text-emerald-400 text-[9px] font-bold tracking-wider uppercase">Answer</span>
+                      <p className="text-slate-200 font-medium text-sm leading-relaxed">{card.back}</p>
+                      <span className="text-blue-400/70 text-[10px] font-semibold text-right">tap to flip back</span>
                     </div>
                   </div>
                 </div>
@@ -383,7 +383,7 @@ export default function StudyBuddyPage() {
                 <button
                   onClick={loadMore}
                   disabled={loadingMore}
-                  className="bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/30 hover:border-indigo-500/50 text-indigo-300 font-bold px-6 py-2.5 rounded-lg text-sm transition-all duration-300 transform active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                  className="glass-btn-secondary px-6 py-2.5 rounded-xl text-sm font-semibold cursor-pointer shadow-sm hover:scale-95 active:scale-90 transition-all flex items-center gap-2"
                 >
                   {loadingMore ? 'Generating...' : 'Show More Flashcards'}
                 </button>
@@ -395,31 +395,31 @@ export default function StudyBuddyPage() {
         {/* MCQs Results */}
         {mcqs.length > 0 && (
           <div className="space-y-4">
-            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">
+            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2">
               MCQ Practice Test
             </p>
             <div className="space-y-4">
               {mcqs.map((q, i) => (
-                <div key={i} className="bg-gray-900/40 backdrop-blur-md border border-gray-800 rounded-xl p-5 shadow-lg">
-                  <p className="text-white font-bold text-sm leading-relaxed mb-4">
-                    <span className="text-indigo-400 font-extrabold mr-1.5">Q{i+1}.</span>
+                <div key={i} className="glass-panel border-white/5 p-6 shadow-md hover:border-white/10 transition-all">
+                  <p className="text-slate-200 font-bold text-sm leading-relaxed mb-4">
+                    <span className="text-blue-400 font-extrabold mr-1.5">Q{i+1}.</span>
                     {q.question}
                   </p>
                   <div className="grid grid-cols-1 gap-2.5">
                     {q.options.map((opt, j) => {
                       const chosen = selected[i];
                       const isCorrect = opt === q.answer;
-                      let btnStyle = "bg-gray-950 border-gray-800 text-gray-300 hover:bg-gray-900/50 hover:text-white";
+                      let btnStyle = "bg-slate-950/50 border-white/5 text-slate-300 hover:bg-white/5 hover:text-white cursor-pointer";
                       
                       if (chosen) {
                         if (opt === chosen && isCorrect) {
-                          btnStyle = "bg-emerald-950/40 border-emerald-500 text-emerald-400 font-bold shadow-[0_0_10px_rgba(16,185,129,0.1)]";
+                          btnStyle = "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 font-bold shadow-[0_0_10px_rgba(16,185,129,0.1)]";
                         } else if (opt === chosen) {
-                          btnStyle = "bg-red-950/40 border-red-500 text-red-400 font-bold";
+                          btnStyle = "bg-rose-500/10 border-rose-500/30 text-rose-400 font-bold";
                         } else if (isCorrect) {
-                          btnStyle = "bg-emerald-950/20 border-emerald-500/50 text-emerald-400";
+                          btnStyle = "bg-emerald-500/5 border-emerald-500/20 text-emerald-400";
                         } else {
-                          btnStyle = "bg-gray-950 border-gray-800/40 text-gray-600";
+                          btnStyle = "bg-slate-950/20 border-white/2 text-slate-600 cursor-not-allowed";
                         }
                       }
                       
@@ -427,7 +427,7 @@ export default function StudyBuddyPage() {
                         <button 
                           key={j} 
                           onClick={() => !chosen && setSelected(s=>({...s,[i]:opt}))} 
-                          className={`text-left px-4 py-2.5 rounded-lg border text-xs font-semibold transition-all duration-200 ${btnStyle} flex items-center justify-between`}
+                          className={`text-left px-4 py-2.5 rounded-xl border text-xs font-semibold transition-all duration-200 ${btnStyle} flex items-center justify-between`}
                         >
                           <span>{opt}</span>
                           {chosen && isCorrect && <Check className="h-4 w-4 text-emerald-400 flex-shrink-0" />}
@@ -436,9 +436,9 @@ export default function StudyBuddyPage() {
                     })}
                   </div>
                   {selected[i] && (
-                    <div className="mt-4 text-xs text-gray-400 bg-gray-950/70 border border-gray-800/80 px-4 py-3 rounded-lg flex gap-2 leading-relaxed">
-                      <span className="font-extrabold text-indigo-400 flex-shrink-0">💡 explanation:</span>
-                      <span className="font-medium text-gray-300">{q.explanation}</span>
+                    <div className="mt-4 text-xs text-slate-400 bg-slate-950/70 border border-white/5 px-4 py-3 rounded-xl flex gap-2 leading-relaxed">
+                      <span className="font-extrabold text-blue-400 flex-shrink-0">💡 Explanation:</span>
+                      <span className="font-medium text-slate-300">{q.explanation}</span>
                     </div>
                   )}
                 </div>
@@ -449,7 +449,7 @@ export default function StudyBuddyPage() {
                 <button
                   onClick={loadMore}
                   disabled={loadingMore}
-                  className="bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/30 hover:border-indigo-500/50 text-indigo-300 font-bold px-6 py-2.5 rounded-lg text-sm transition-all duration-300 transform active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                  className="glass-btn-secondary px-6 py-2.5 rounded-xl text-sm font-semibold cursor-pointer shadow-sm hover:scale-95 active:scale-90 transition-all flex items-center gap-2"
                 >
                   {loadingMore ? 'Generating...' : 'Show More MCQs'}
                 </button>

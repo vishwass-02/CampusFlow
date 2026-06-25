@@ -36,8 +36,9 @@ export default function Login() {
         localStorage.setItem('token', data.token);
         router.push('/');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'An error occurred during authentication.');
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError((err as any).response?.data?.error || 'An error occurred during authentication.');
     } finally {
       setLoading(false);
     }
@@ -52,8 +53,9 @@ export default function Login() {
       const { data } = await api.post('/auth/verify', { id: userId, code });
       localStorage.setItem('token', data.token);
       router.push('/');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Invalid verification code.');
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError((err as any).response?.data?.error || 'Invalid verification code.');
     } finally {
       setLoading(false);
     }

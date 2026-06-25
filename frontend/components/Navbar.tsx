@@ -9,7 +9,9 @@ export default function Navbar() {
   const [studentName, setStudentName] = useState('');
 
   useEffect(() => {
-    setStudentName(localStorage.getItem('studentName') || 'Student');
+    setTimeout(() => {
+      setStudentName(localStorage.getItem('studentName') || 'Student');
+    }, 0);
   }, []);
 
   const handleLogout = () => {
@@ -26,53 +28,55 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-md bg-gray-950/70 border-b border-gray-800/85 px-6 py-3 flex items-center justify-between">
-      <div 
-        className="flex items-center gap-2 cursor-pointer group"
-        onClick={() => router.push('/dashboard')}
-      >
-        <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 p-1.5 rounded-lg group-hover:shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-300">
-          <GraduationCap className="h-5 w-5 text-white" />
-        </div>
-        <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent font-extrabold text-xl tracking-tight">
-          CampusFlow
-        </span>
-      </div>
-
-      <div className="flex gap-1 md:gap-2">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.path;
-          return (
-            <button
-              key={item.path}
-              onClick={() => router.push(item.path)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                isActive
-                  ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 shadow-[0_0_10px_rgba(99,102,241,0.15)]'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-900/50'
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              <span className="hidden sm:inline">{item.name}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="flex items-center gap-4">
-        <div className="hidden md:flex flex-col text-right">
-          <span className="text-gray-500 text-[10px] font-semibold tracking-wider uppercase">Student Profile</span>
-          <span className="text-gray-200 text-sm font-semibold">👋 {studentName}</span>
-        </div>
-        <button
-          onClick={handleLogout}
-          className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors duration-300"
-          title="Logout"
+    <div className="w-full max-w-5xl mx-auto px-4 pt-4 sticky top-0 z-50">
+      <nav className="backdrop-blur-xl bg-[#0a1428]/50 border border-white/8 px-6 py-2 flex items-center justify-between shadow-[0_15px_50px_rgba(0,0,0,0.5)] rounded-full">
+        <div 
+          className="flex items-center gap-2 cursor-pointer group"
+          onClick={() => router.push('/dashboard')}
         >
-          <LogOut className="h-4 w-4" />
-        </button>
-      </div>
-    </nav>
+          <div className="bg-gradient-to-tr from-blue-600 to-indigo-600 p-2 rounded-full group-hover:shadow-[0_0_15px_rgba(37,99,235,0.45)] transition-all duration-300">
+            <GraduationCap className="h-4.5 w-4.5 text-white" />
+          </div>
+          <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent font-extrabold text-lg tracking-tight">
+            CampusFlow
+          </span>
+        </div>
+
+        <div className="flex gap-1 md:gap-1.5">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.path;
+            return (
+              <button
+                key={item.path}
+                onClick={() => router.push(item.path)}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 border cursor-pointer ${
+                  isActive
+                    ? 'bg-blue-500/10 text-blue-400 border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5 border-transparent'
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{item.name}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="hidden md:flex flex-col text-right">
+            <span className="text-slate-500 text-[8px] font-extrabold tracking-wider uppercase">Student Profile</span>
+            <span className="text-slate-200 text-xs font-semibold">👋 {studentName}</span>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="p-2 text-slate-400 hover:text-rose-450 hover:bg-rose-500/10 rounded-full transition-all duration-300 border border-transparent hover:border-rose-500/10 cursor-pointer"
+            title="Logout"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </nav>
+    </div>
   );
 }

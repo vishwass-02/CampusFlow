@@ -33,6 +33,7 @@ export default function Home() {
           // No profile, needs onboarding
           router.push('/onboarding');
         }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         if (err.response?.status === 404) {
           // User authenticated but no student profile
@@ -49,11 +50,11 @@ export default function Home() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-4">
-      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-indigo-600/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-600/10 blur-[120px] pointer-events-none" />
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mb-4 z-10"></div>
-      <p className="text-gray-400 text-sm z-10 animate-pulse">Loading your workspace...</p>
+    <div className="min-h-screen bg-[#050816] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      <div className="spotlight-top" />
+      <div className="spotlight-bottom" />
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-4 z-10"></div>
+      <p className="text-slate-400 text-xs font-semibold z-10 animate-pulse tracking-wide">Loading your workspace...</p>
     </div>
   );
 }

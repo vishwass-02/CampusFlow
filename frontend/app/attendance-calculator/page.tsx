@@ -4,13 +4,10 @@ import Navbar from '@/components/Navbar';
 import { 
   Calendar as CalendarIcon, 
   Calculator, 
-  Check, 
   AlertTriangle, 
   ChevronLeft, 
   ChevronRight, 
   Settings, 
-  Info, 
-  Sparkles,
   RefreshCw
 } from 'lucide-react';
 
@@ -49,11 +46,15 @@ export default function AttendanceCalculatorPage() {
   // Sync calendar month with semester selection
   useEffect(() => {
     if (semesterType === 'odd') {
-      setCurrentYear(2026);
-      setCurrentMonth(6); // June
+      setTimeout(() => {
+        setCurrentYear(2026);
+        setCurrentMonth(6); // June
+      }, 0);
     } else if (semesterType === 'even') {
-      setCurrentYear(2026);
-      setCurrentMonth(11); // November
+      setTimeout(() => {
+        setCurrentYear(2026);
+        setCurrentMonth(11); // November
+      }, 0);
     }
   }, [semesterType]);
 

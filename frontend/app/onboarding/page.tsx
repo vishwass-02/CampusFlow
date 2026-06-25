@@ -136,9 +136,13 @@ export default function Onboarding() {
           {/* Header Area */}
           <div className="space-y-4">
             {/* Logo Brand */}
-            <div className="flex items-center gap-2">
-              <div className="bg-blue-500/10 border border-blue-500/20 p-2 rounded-full text-blue-400">
-                <GraduationCap className="h-4.5 w-4.5" strokeWidth={1.75} />
+            <div className="flex items-center gap-3">
+              <div className="bg-white px-2.5 py-1 rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.1)] flex items-center justify-center">
+                <img 
+                  src="/logo.png" 
+                  alt="CampusFlow Logo" 
+                  className="h-6.5 w-auto object-contain"
+                />
               </div>
               <span className="text-lg font-bold text-slate-200 tracking-tight font-brand-sans">CampusFlow</span>
             </div>
@@ -156,7 +160,7 @@ export default function Onboarding() {
                 your <span className="text-blue-450 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">experience</span>
               </h1>
               <p className="text-slate-400 text-sm leading-relaxed">
-                One minute setup for a smarter academic journey.
+                One minute setup to configure your B.Tech profile and unlock automated WhatsApp reminders & AI study assistance.
               </p>
             </div>
           </div>

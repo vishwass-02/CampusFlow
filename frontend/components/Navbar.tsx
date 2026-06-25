@@ -1,6 +1,6 @@
 'use client';
 import { useRouter, usePathname } from 'next/navigation';
-import { Brain, Calendar, Activity, GraduationCap, LogOut, Calculator } from 'lucide-react';
+import { Brain, Calendar, Activity, GraduationCap, LogOut, Calculator, Briefcase } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function Navbar() {
@@ -23,6 +23,7 @@ export default function Navbar() {
     { name: 'Dashboard', path: '/dashboard', icon: Calendar },
     { name: 'Study Buddy', path: '/study-buddy', icon: Brain },
     { name: 'Notices', path: '/notice-summarizer', icon: GraduationCap },
+    { name: 'Placements', path: '/placements', icon: Briefcase },
     { name: 'Automations', path: '/automations', icon: Activity },
     { name: 'Attendance', path: '/attendance-calculator', icon: Calculator },
   ];
@@ -31,15 +32,14 @@ export default function Navbar() {
     <div className="w-full max-w-5xl mx-auto px-4 pt-4 sticky top-0 z-50">
       <nav className="backdrop-blur-xl bg-[#0a1428]/50 border border-white/8 px-6 py-2 flex items-center justify-between shadow-[0_15px_50px_rgba(0,0,0,0.5)] rounded-full">
         <div 
-          className="flex items-center gap-2 cursor-pointer group"
+          className="flex items-center cursor-pointer group"
           onClick={() => router.push('/dashboard')}
         >
-          <div className="bg-gradient-to-tr from-blue-600 to-indigo-600 p-2 rounded-full group-hover:shadow-[0_0_15px_rgba(37,99,235,0.45)] transition-all duration-300">
-            <GraduationCap className="h-4.5 w-4.5 text-white" />
-          </div>
-          <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent font-extrabold text-lg tracking-tight">
-            CampusFlow
-          </span>
+          <img 
+            src="/logo.png" 
+            alt="CampusFlow Logo" 
+            className="h-7 w-auto object-contain bg-white rounded-lg px-2 py-0.5 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-all duration-300"
+          />
         </div>
 
         <div className="flex gap-1 md:gap-1.5">

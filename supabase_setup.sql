@@ -57,8 +57,37 @@ ALTER TABLE students ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE automation_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE placements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prep_plans ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow all on students" ON students FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all on tasks" ON tasks FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all on notices" ON notices FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all on automation_logs" ON automation_logs FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all on placements" ON placements FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all on prep_plans" ON prep_plans FOR ALL USING (true) WITH CHECK (true);
+
+-- Placements table
+CREATE TABLE IF NOT EXISTS placements (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  student_id UUID REFERENCES students(id) ON DELETE CASCADE,
+  company TEXT NOT NULL,
+  role TEXT NOT NULL,
+  applied_date DATE NOT NULL,
+  status TEXT DEFAULT 'Applied',
+  current_round TEXT DEFAULT 'Online Assessment',
+  notes TEXT,
+  package_lpa NUMERIC,
+  rounds_cleared TEXT[] DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Prep Plans table
+CREATE TABLE IF NOT EXISTS prep_plans (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  student_id UUID REFERENCES students(id) ON DELETE CASCADE,
+  week_start DATE NOT NULL,
+  plan_json JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+

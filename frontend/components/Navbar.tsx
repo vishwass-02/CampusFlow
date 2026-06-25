@@ -1,6 +1,6 @@
 'use client';
 import { useRouter, usePathname } from 'next/navigation';
-import { Brain, Calendar, Activity, GraduationCap, LogOut } from 'lucide-react';
+import { Brain, Calendar, Activity, GraduationCap, LogOut, Briefcase } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function Navbar() {
@@ -21,6 +21,7 @@ export default function Navbar() {
     { name: 'Dashboard', path: '/dashboard', icon: Calendar },
     { name: 'Study Buddy', path: '/study-buddy', icon: Brain },
     { name: 'Notices', path: '/notice-summarizer', icon: GraduationCap },
+    { name: 'Placements', path: '/placements', icon: Briefcase },
     { name: 'Automations', path: '/automations', icon: Activity },
   ];
 

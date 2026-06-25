@@ -7,6 +7,7 @@ const tasksRouter = require('./routes/tasks');
 const aiRouter = require('./routes/ai');
 const noticesRouter = require('./routes/notices');
 const automationsRouter = require('./routes/automations');
+const placementsRouter = require('./routes/placements');
 
 const app = express();
 app.use(cors());
@@ -18,6 +19,7 @@ app.use('/tasks', tasksRouter);
 app.use('/ai', aiRouter);
 app.use('/notices', noticesRouter);
 app.use('/automations', automationsRouter);
+app.use('/placements', placementsRouter);
 
 app.get('/', (req, res) => res.json({ status: 'CampusFlow backend running' }));
 

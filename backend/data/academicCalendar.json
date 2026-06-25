@@ -1,0 +1,64 @@
+{
+  "institution": "CHRIST (Deemed to be University) - Bangalore Kengeri Campus",
+  "program": "BTech",
+  "academicYear": "2026-27",
+  "currentSemesterType": "odd",
+  "semesters": {
+    "odd": {
+      "appliesTo": "I/III/V/VII/IX semester BTech",
+      "classesStart": "2026-06-02",
+      "lastInstructionDay": "2026-09-26",
+      "midSemExamStart": "2026-08-03",
+      "midSemExamEnd": "2026-08-08",
+      "endSemExamStart": "2026-10-01",
+      "endSemExamEnd": "2026-10-17"
+    },
+    "even": {
+      "appliesTo": "II/IV/VI/VIII/X semester UG",
+      "classesStart": "2026-10-27",
+      "lastInstructionDay": "2027-03-05",
+      "midSemExamStart": "2027-01-04",
+      "midSemExamEnd": "2027-01-09",
+      "endSemExamStart": "2027-03-09",
+      "endSemExamEnd": "2027-03-24"
+    }
+  },
+  "noAttendanceWindows": [
+    { "label": "Odd Semester Mid Sem Exams", "start": "2026-08-03", "end": "2026-08-08", "appliesTo": "odd" },
+    { "label": "Odd Semester End Sem Exams", "start": "2026-10-01", "end": "2026-10-17", "appliesTo": "odd" },
+    { "label": "Even Semester Mid Sem Exams", "start": "2027-01-04", "end": "2027-01-09", "appliesTo": "even" },
+    { "label": "Even Semester End Sem Exams", "start": "2027-03-09", "end": "2027-03-24", "appliesTo": "even" }
+  ],
+  "holidays": [
+    { "date": "2026-06-26", "name": "Last Day of Muharram" },
+    { "date": "2026-08-15", "name": "Independence Day" },
+    { "date": "2026-08-26", "name": "Eid-Milad" },
+    { "date": "2026-09-14", "name": "Ganesh Chaturthi" },
+    { "date": "2026-10-02", "name": "Gandhi Jayanthi" },
+    { "date": "2026-10-10", "name": "Mahalaya Amavasye" },
+    { "date": "2026-10-20", "name": "Mahanavami/Ayudhapooja" },
+    { "date": "2026-10-21", "name": "Vijayadasami" },
+    { "date": "2026-10-26", "name": "Maharshi Valmiki Jayanthi" },
+    { "date": "2026-11-01", "name": "Kannada Rajyothsava" },
+    { "date": "2026-11-08", "name": "Naraka Chaturdashi" },
+    { "date": "2026-11-10", "name": "Balipadyami, Deepavali" },
+    { "date": "2026-11-27", "name": "Kanakadasa Jayanthi" },
+    { "date": "2026-11-28", "name": "Compensatory Holiday (for 3rd Saturday, 21 Nov 2026)" },
+    { "date": "2027-01-14", "name": "Makara Sankranti" },
+    { "date": "2027-01-26", "name": "Republic Day" },
+    { "date": "2027-03-06", "name": "Maha Shivaratri" },
+    { "date": "2027-03-10", "name": "Idul Fitr" },
+    { "date": "2027-03-26", "name": "Good Friday" },
+    { "date": "2027-04-08", "name": "Ugadi" },
+    { "date": "2027-04-14", "name": "Dr Ambedkar Jayanthi" },
+    { "date": "2027-04-19", "name": "Mahavir Jayanthi" },
+    { "date": "2027-05-01", "name": "May Day" },
+    { "date": "2027-05-09", "name": "Basava Jayanthi" },
+    { "date": "2027-05-17", "name": "Bakrid" }
+  ],
+  "thirdSaturdayOverrides": [
+    { "date": "2026-10-17", "type": "workingDay", "note": "3rd Saturday declared a working day (also inside End Sem Exam window, so still 0 classes due to exams)" },
+    { "date": "2026-11-21", "type": "workingDay", "note": "3rd Saturday declared a working day; compensatory holiday given on 2026-11-28 instead" },
+    { "date": "2026-12-19", "type": "workingDay", "note": "3rd Saturday declared a working day" }
+  ]
+}

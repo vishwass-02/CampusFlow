@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { supabase } = require('../middleware/supabase');
+const { readDb, writeDb, generateId } = require('../db');
 
 // POST register student
-router.post('/register', async (req, res) => {
-  const { name, branch, year, subjects, phone, email } = req.body;
+router.post('/register', (req, res) => {
+  const { id, name, branch, year, subjects, phone, email } = req.body;
+  
   let normalizedPhone = phone ? phone.trim() : '';
   if (normalizedPhone) {
     if (normalizedPhone.startsWith('whatsapp:')) {
@@ -18,24 +19,27 @@ router.post('/register', async (req, res) => {
       }
     }
   }
-  const { data, error } = await supabase
-    .from('students')
-    .insert([{ name, branch, year, subjects, phone: normalizedPhone, email }])
-    .select()
-    .single();
-  if (error) return res.status(500).json({ error });
-  res.json(data);
+
+  const db = readDb();
+  const newStudent = {
+    id: id || generateId(),
+    name, branch, year, subjects, phone: normalizedPhone, email,
+    created_at: new Date().toISOString()
+  };
+
+  db.students.push(newStudent);
+  writeDb(db);
+
+  res.json(newStudent);
 });
 
 // GET student by id
-router.get('/:id', async (req, res) => {
-  const { data, error } = await supabase
-    .from('students')
-    .select('*')
-    .eq('id', req.params.id)
-    .single();
-  if (error) return res.status(404).json({ error });
-  res.json(data);
+router.get('/:id', (req, res) => {
+  const db = readDb();
+  const student = db.students.find(s => s.id === req.params.id);
+  
+  if (!student) return res.status(404).json({ error: 'Student not found' });
+  res.json(student);
 });
 
 module.exports = router;

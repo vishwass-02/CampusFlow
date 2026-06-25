@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { User, Mail, Phone, BookOpen, GraduationCap, MapPin, Sparkles } from 'lucide-react';
@@ -8,13 +8,44 @@ export default function Onboarding() {
   const router = useRouter();
   const [form, setForm] = useState({
     name: '', branch: '', year: '1',
-    subjects: '', phone: '', email: '',
+    subjects: '', phone: '', email: '', id: '',
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    // Detect if the page was refreshed (reload) vs navigated to from the app
+    const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+    const isRefresh = navEntries.length > 0 && navEntries[0].type === 'reload';
+
+    if (isRefresh) {
+      localStorage.removeItem('token');
+      router.push('/login');
+      return;
+    }
+
+    const getUser = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+      try {
+        const { data } = await api.get('/auth/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setForm(prev => ({ ...prev, email: data.email || '', id: data.id }));
+      } catch (err) {
+        router.push('/login');
+      } finally {
+        setLoading(false);
+      }
+    };
+    getUser();
+  }, [router]);
+
   const handleSubmit = async () => {
-    if (!form.name || !form.branch || !form.subjects || !form.phone || !form.email) {
+    if (!form.name || !form.branch || !form.subjects || !form.phone) {
       setError('Please fill in all the fields.');
       return;
     }
@@ -30,10 +61,18 @@ export default function Onboarding() {
       localStorage.setItem('studentName', data.name);
       router.push('/dashboard');
     } catch (err) {
-      setError('Registration failed. Check your backend and database connection.');
+      setError('Registration failed. Check your backend server.');
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-gray-950 flex items-center justify-center p-4 overflow-hidden font-sans">
@@ -140,16 +179,15 @@ export default function Onboarding() {
             </div>
           </div>
 
-          {/* Email */}
+          {/* Email (Read Only from Auth) */}
           <div>
-            <label className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5 block">Email Address</label>
+            <label className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5 block">Email Address (Verified)</label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
               <input
-                className="w-full bg-gray-950/60 border border-gray-800 rounded-lg pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder-gray-600"
-                placeholder="vishwas@christuniversity.in"
+                disabled
+                className="w-full bg-gray-950/30 border border-gray-800 rounded-lg pl-10 pr-4 py-2.5 text-gray-400 text-sm focus:outline-none transition-all cursor-not-allowed"
                 value={form.email}
-                onChange={e => setForm({ ...form, email: e.target.value })}
               />
             </div>
           </div>

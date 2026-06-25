@@ -164,6 +164,42 @@ router.post('/', async (req, res) => {
     }, delay1h);
   }
 
+  // 4.6. Schedule recurring 3h progress updates (15s in test_mode, 3h in prod)
+  const intervalMs = test_mode ? 15 * 1000 : 3 * 3600 * 1000;
+  const intervalId = setInterval(async () => {
+    const { data: currentTask, error: fetchErr } = await supabase
+      .from('tasks')
+      .select('status, deadline, title, subject')
+      .eq('id', task.id)
+      .single();
+
+    if (fetchErr || !currentTask || currentTask.status !== 'pending') {
+      clearInterval(intervalId);
+      return;
+    }
+
+    const timeLeftMs = new Date(currentTask.deadline) - new Date();
+    if (timeLeftMs <= 0) {
+      clearInterval(intervalId);
+      return;
+    }
+
+    const hoursLeft = Math.floor(timeLeftMs / (3600 * 1000));
+    const minsLeft = Math.floor((timeLeftMs % (3600 * 1000)) / 60000);
+    let timeStr = "";
+    if (hoursLeft > 0) {
+      timeStr += `${hoursLeft} hour(s)`;
+      if (minsLeft > 0) {
+        timeStr += ` and ${minsLeft} minute(s)`;
+      }
+    } else {
+      timeStr += `${minsLeft} minute(s)`;
+    }
+
+    const progressMsg = `⏳ Progress Alert: *${currentTask.subject}* — '${currentTask.title}' has *${timeStr}* remaining until submission! — CampusFlow`;
+    await sendWhatsApp(`whatsapp:${student.phone}`, progressMsg);
+  }, intervalMs);
+
   // 5. Mark task as n8n_triggered (meaning WhatsApp triggered) in DB
   if (triggered) {
     await supabase

@@ -101,6 +101,46 @@ async function recoverScheduledReminders() {
           await sendWhatsApp(`whatsapp:${student.phone}`, reminder1hMsg);
         }, delay1h);
       }
+
+      // 5. Recover 3h recurring status reminders
+      const timeLeftMs = deadlineTime - now;
+      if (timeLeftMs > 0) {
+        const intervalMs = 3 * 3600 * 1000;
+        console.log(`⏰ [CampusFlow] Rescheduled 3h recurring reminders for task '${task.title}' (${task.subject}).`);
+        const intervalId = setInterval(async () => {
+          const { data: currentTask, error: fetchErr } = await supabase
+            .from('tasks')
+            .select('status, deadline, title, subject')
+            .eq('id', task.id)
+            .single();
+
+          if (fetchErr || !currentTask || currentTask.status !== 'pending') {
+            clearInterval(intervalId);
+            return;
+          }
+
+          const freshTimeLeftMs = new Date(currentTask.deadline) - new Date();
+          if (freshTimeLeftMs <= 0) {
+            clearInterval(intervalId);
+            return;
+          }
+
+          const hoursLeft = Math.floor(freshTimeLeftMs / (3600 * 1000));
+          const minsLeft = Math.floor((freshTimeLeftMs % (3600 * 1000)) / 60000);
+          let timeStr = "";
+          if (hoursLeft > 0) {
+            timeStr += `${hoursLeft} hour(s)`;
+            if (minsLeft > 0) {
+              timeStr += ` and ${minsLeft} minute(s)`;
+            }
+          } else {
+            timeStr += `${minsLeft} minute(s)`;
+          }
+
+          const progressMsg = `⏳ Progress Alert: *${currentTask.subject}* — '${currentTask.title}' has *${timeStr}* remaining until submission! — CampusFlow`;
+          await sendWhatsApp(`whatsapp:${student.phone}`, progressMsg);
+        }, intervalMs);
+      }
     }
     console.log("✅ [CampusFlow] Recovery of scheduled reminders completed!");
   } catch (err) {

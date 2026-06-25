@@ -57,7 +57,7 @@ export default function NoticeSummarizer() {
         summary: bullets.map(b => `• ${b}`).join(' | '),
         phoneList: [],
         eventTitle,
-        eventDate,
+        eventDate: eventDate ? new Date(eventDate).toISOString() : null,
         studentId,
       });
       setBroadcasted(true);

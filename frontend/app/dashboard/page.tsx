@@ -67,7 +67,12 @@ export default function Dashboard() {
     if (!newTask.title || !newTask.subject || !newTask.deadline) return;
     setLoading(true);
     try {
-      await api.post('/tasks', { ...newTask, student_id: studentId, test_mode: testMode });
+      await api.post('/tasks', { 
+        ...newTask, 
+        deadline: new Date(newTask.deadline).toISOString(), 
+        student_id: studentId, 
+        test_mode: testMode 
+      });
       setNewTask({ title: '', subject: '', deadline: '' });
       setShowAddTask(false);
       fetchTasks(studentId);

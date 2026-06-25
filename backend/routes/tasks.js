@@ -19,6 +19,19 @@ const twilio = require('twilio');
 
 async function sendWhatsApp(toPhone, message) {
   try {
+    let target = toPhone ? toPhone.trim() : '';
+    if (target.startsWith('whatsapp:')) {
+      target = target.substring('whatsapp:'.length);
+    }
+    if (!target.startsWith('+')) {
+      if (target.length === 10) {
+        target = '+91' + target;
+      } else {
+        target = '+' + target;
+      }
+    }
+    const formattedPhone = `whatsapp:${target}`;
+
     const client = twilio(
       process.env.TWILIO_ACCOUNT_SID,
       process.env.TWILIO_AUTH_TOKEN
@@ -26,11 +39,11 @@ async function sendWhatsApp(toPhone, message) {
 
     await client.messages.create({
       from: process.env.TWILIO_FROM,
-      to: toPhone,                      // e.g. whatsapp:+919876543210
+      to: formattedPhone,
       body: message,
     });
 
-    console.log(`✅ WhatsApp sent to ${toPhone}`);
+    console.log(`✅ WhatsApp sent to ${formattedPhone}`);
     return true;
   } catch (err) {
     console.error('❌ Twilio error:', err.message);

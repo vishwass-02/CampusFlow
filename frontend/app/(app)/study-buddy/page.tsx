@@ -179,10 +179,7 @@ export default function StudyBuddyPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#050816] overflow-x-hidden pb-16">
-      {/* Glow effects */}
-      <div className="spotlight-top" />
-      <div className="spotlight-bottom" />
+    <div className="relative min-h-screen overflow-x-hidden pb-16">
 
       <main className="max-w-4xl mx-auto px-6 py-12 relative z-10 space-y-12">
         <div>

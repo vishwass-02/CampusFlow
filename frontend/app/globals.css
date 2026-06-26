@@ -232,12 +232,12 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 /* CampusFlow Visual Redesign Glassmorphism Utilities */
 
 .glass-card {
-  background: rgba(10, 20, 40, 0.45); /* Deep translucent blue/navy frosted glass */
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 20, 40, 0.3);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 
-    0 30px 60px rgba(0, 0, 0, 0.65), 
+    0 30px 60px rgba(0, 0, 0, 0.5), 
     0 0 50px rgba(59, 130, 246, 0.06),
     inset 0 1px 1px rgba(255, 255, 255, 0.12),
     inset 0 0 15px rgba(59, 130, 246, 0.03);
@@ -257,8 +257,10 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 }
 
 .glass-panel {
-  background: rgba(4, 8, 20, 0.75); /* Dark solid blue/slate container for layered panels */
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(4, 8, 20, 0.45);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 18px;
   box-shadow: 
     inset 0 1px 1px rgba(255, 255, 255, 0.04),
@@ -270,15 +272,17 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 }
 .glass-panel-hover:hover {
   border-color: rgba(59, 130, 246, 0.25);
-  background: rgba(4, 8, 20, 0.85);
+  background: rgba(4, 8, 20, 0.6);
   box-shadow: 
     inset 0 1px 1px rgba(255, 255, 255, 0.06),
     0 0 20px rgba(59, 130, 246, 0.08);
 }
 
 .glass-input {
-  background: rgba(3, 7, 18, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(3, 7, 18, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: #f8fafc;
   outline: none;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -308,8 +312,10 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 }
 
 .glass-btn-secondary {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: #cbd5e1;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -350,5 +356,17 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 .progress-glow-blue {
   background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
   box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+}
+
+/* LineWaves fixed background layer */
+.line-waves-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
 

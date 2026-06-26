@@ -30,7 +30,7 @@ export default function Navbar() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 pt-4 sticky top-0 z-50">
-      <nav className="backdrop-blur-xl bg-[#0a1428]/50 border border-white/8 px-6 py-2 flex items-center justify-between shadow-[0_15px_50px_rgba(0,0,0,0.5)] rounded-full">
+      <nav className="backdrop-blur-2xl bg-[#0a1428]/35 border border-white/10 px-6 py-2 flex items-center justify-between shadow-[0_15px_50px_rgba(0,0,0,0.5)] rounded-full">
         <div 
           className="flex items-center cursor-pointer group"
           onClick={() => router.push('/dashboard')}

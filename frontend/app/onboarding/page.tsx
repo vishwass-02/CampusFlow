@@ -1,7 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import api from '@/lib/api';
+
+const LineWaves = dynamic(() => import('@/components/LineWaves'), { ssr: false });
 import { 
   User, 
   Mail, 
@@ -115,8 +118,9 @@ export default function Onboarding() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050816] flex flex-col items-center justify-center relative overflow-hidden">
-        <div className="spotlight-top" />
-        <div className="spotlight-bottom" />
+        <div className="line-waves-bg">
+          <LineWaves speed={0.2} innerLineCount={28} outerLineCount={32} warpIntensity={0.8} rotation={-45} edgeFadeWidth={0.0} colorCycleSpeed={0.6} brightness={0.12} color1="#3b82f6" color2="#6366f1" color3="#8b5cf6" enableMouseInteraction={false} mouseInfluence={1.5} />
+        </div>
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 z-10"></div>
       </div>
     );
@@ -125,9 +129,10 @@ export default function Onboarding() {
   return (
     <div className="relative min-h-screen bg-[#050816] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
       
-      {/* ── Ambient background glows ──────────────────────────────────────── */}
-      <div className="spotlight-top" />
-      <div className="spotlight-bottom" />
+      {/* ── Animated WebGL background ──────────────────────────────────────── */}
+      <div className="line-waves-bg">
+        <LineWaves speed={0.2} innerLineCount={28} outerLineCount={32} warpIntensity={0.8} rotation={-45} edgeFadeWidth={0.0} colorCycleSpeed={0.6} brightness={0.12} color1="#3b82f6" color2="#6366f1" color3="#8b5cf6" enableMouseInteraction={true} mouseInfluence={1.5} />
+      </div>
 
       <div className="relative w-full max-w-[480px]">
         {/* ── Card shell ────────────────────────────────────────────────────── */}

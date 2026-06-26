@@ -2,8 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import api from '@/lib/api';
 import { Mail, Lock, LogIn, UserPlus, Key, CheckCircle } from 'lucide-react';
+
+const LineWaves = dynamic(() => import('@/components/LineWaves'), { ssr: false });
 
 export default function Login() {
   const router = useRouter();
@@ -62,9 +65,25 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gray-950 flex items-center justify-center p-4 overflow-hidden font-sans">
-      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-indigo-600/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-600/10 blur-[120px] pointer-events-none" />
+    <div className="relative min-h-screen bg-[#050816] flex items-center justify-center p-4 overflow-hidden font-sans">
+      {/* Animated WebGL background */}
+      <div className="line-waves-bg">
+        <LineWaves
+          speed={0.2}
+          innerLineCount={28}
+          outerLineCount={32}
+          warpIntensity={0.8}
+          rotation={-45}
+          edgeFadeWidth={0.0}
+          colorCycleSpeed={0.6}
+          brightness={0.12}
+          color1="#3b82f6"
+          color2="#6366f1"
+          color3="#8b5cf6"
+          enableMouseInteraction={true}
+          mouseInfluence={1.5}
+        />
+      </div>
 
       <div className="relative w-full max-w-md bg-gray-900/40 backdrop-blur-xl border border-gray-800/80 rounded-2xl p-8 md:p-10 shadow-2xl">
         <div className="flex flex-col items-center text-center mb-8">
